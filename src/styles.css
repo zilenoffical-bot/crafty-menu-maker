@@ -56,8 +56,8 @@
   --ring: oklch(0.89 0.19 118);
   --status: oklch(0.76 0.18 145);
   --icon: oklch(0.13 0.018 155 / 76%);
-  --tile: oklch(0.16 0.018 155 / 87%);
-  --tile-active: oklch(0.22 0.028 150 / 94%);
+  --tile: oklch(0.16 0.018 155 / 58%);
+  --tile-active: oklch(0.22 0.028 150 / 78%);
   --scene-muted: oklch(0.86 0.018 140);
   --scene-wash: linear-gradient(105deg, oklch(0.08 0.015 155 / 88%) 0%, oklch(0.09 0.018 155 / 62%) 52%, oklch(0.11 0.02 75 / 45%) 100%);
   --tile-wash: linear-gradient(180deg, oklch(0.1 0.015 155 / 12%), oklch(0.09 0.018 155 / 84%));
@@ -94,9 +94,13 @@
 
 .tile-enter {
   opacity: 0;
-  animation: tile-in 480ms cubic-bezier(.2,.75,.25,1) forwards;
+  animation: tile-in 560ms cubic-bezier(.2,.75,.25,1) forwards;
 }
 .animate-detail-in { animation: detail-in 220ms ease-out both; }
+
+.menu-open { animation: menu-slide-in 540ms cubic-bezier(.22,.8,.26,1) both; }
+.menu-close { animation: menu-slide-out 450ms cubic-bezier(.5,.05,.7,.2) both; }
+.menu-fade { animation: menu-fade-in 420ms ease-out both; }
 
 .volume-slider {
   accent-color: var(--color-primary);
@@ -104,8 +108,20 @@
 }
 
 @keyframes tile-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(18px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes menu-slide-in {
+  from { opacity: 0; transform: translateX(-64px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes menu-slide-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-72px); }
+}
+@keyframes menu-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes detail-in {
   from { opacity: 0; transform: scale(.97) translateY(8px); }

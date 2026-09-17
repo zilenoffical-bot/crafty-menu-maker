@@ -19,13 +19,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ElementType } from "react";
 import cityImage from "@/assets/szcode-city.jpg";
-import playersImage from "@/assets/tile-players.jpg";
-import settingsImage from "@/assets/tile-settings.jpg";
-import newsImage from "@/assets/tile-news.jpg";
-import rulesImage from "@/assets/tile-rules.jpg";
-import mapImage from "@/assets/tile-map.jpg";
-import helpImage from "@/assets/tile-help.jpg";
-import returnImage from "@/assets/tile-return.jpg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -56,9 +49,7 @@ type Tile = {
   description: string;
   icon: ElementType;
   area: string;
-  image: string;
   accent?: boolean;
-  position?: string;
 };
 
 const tiles: Tile[] = [
@@ -69,8 +60,6 @@ const tiles: Tile[] = [
     description: "128 játékos online",
     icon: UsersRound,
     area: "tile-players",
-    image: playersImage,
-    position: "object-left",
   },
   {
     id: "settings",
@@ -79,7 +68,6 @@ const tiles: Tile[] = [
     description: "Grafika, hang és irányítás",
     icon: Settings,
     area: "tile-settings",
-    image: settingsImage,
   },
   {
     id: "news",
@@ -88,8 +76,6 @@ const tiles: Tile[] = [
     description: "Megérkezett a Night Shift frissítés",
     icon: Newspaper,
     area: "tile-news",
-    image: newsImage,
-    position: "object-right",
   },
   {
     id: "rules",
@@ -98,7 +84,6 @@ const tiles: Tile[] = [
     description: "Játssz tisztán. Maradj karakterben.",
     icon: BookOpenText,
     area: "tile-rules",
-    image: rulesImage,
   },
   {
     id: "map",
@@ -107,9 +92,7 @@ const tiles: Tile[] = [
     description: "Helyszínek és útvonalak",
     icon: MapPinned,
     area: "tile-map",
-    image: mapImage,
     accent: true,
-    position: "object-center",
   },
   {
     id: "help",
@@ -118,7 +101,6 @@ const tiles: Tile[] = [
     description: "Parancsok és gyakori kérdések",
     icon: CircleHelp,
     area: "tile-help",
-    image: helpImage,
   },
   {
     id: "return",
@@ -127,13 +109,13 @@ const tiles: Tile[] = [
     description: "ESC billentyűvel is bezárható",
     icon: Gamepad2,
     area: "tile-return",
-    image: returnImage,
     accent: true,
   },
 ];
 
 function Index() {
   const [menuOpen, setMenuOpen] = useState(true);
+  const [closing, setClosing] = useState(false);
   const [active, setActive] = useState<Tile | null>(null);
   const [time, setTime] = useState("18:33");
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -173,6 +155,17 @@ function Index() {
     oscillator.addEventListener("ended", () => void context.close());
   };
 
+  const closeMenu = () => {
+    if (closing) return;
+    playMenuSound("close");
+    sendToFiveM("closePauseMenu");
+    setClosing(true);
+    window.setTimeout(() => {
+      setMenuOpen(false);
+      setClosing(false);
+    }, 470);
+  };
+
   useEffect(() => {
     const updateTime = () =>
       setTime(new Intl.DateTimeFormat("hu-HU", { hour: "2-digit", minute: "2-digit" }).format(new Date()));
@@ -185,12 +178,14 @@ function Index() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (active) setActive(null);
-        else setMenuOpen((current) => !current);
+        else if (menuOpen) closeMenu();
+        else setMenuOpen(true);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, menuOpen, closing]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -200,11 +195,10 @@ function Index() {
   }, [menuOpen]);
 
   const chooseTile = (tile: Tile) => {
-    playMenuSound(tile.id === "return" ? "close" : "select");
     if (tile.id === "return") {
-      sendToFiveM("closePauseMenu");
-      setMenuOpen(false);
+      closeMenu();
     } else {
+      playMenuSound("select");
       sendToFiveM("openSection", { section: tile.id });
       setActive(tile);
     }
@@ -227,7 +221,7 @@ function Index() {
         />
       )}
       <div
-        className={cn("absolute inset-0", isFiveM ? "bg-black/45" : "bg-scene-wash")}
+        className={cn("absolute inset-0", menuOpen && "menu-fade", isFiveM ? "bg-black/45" : "bg-scene-wash")}
         aria-hidden="true"
       />
 
@@ -241,7 +235,7 @@ function Index() {
           </div>
         </div>
       ) : (
-        <section className="relative z-10 flex min-h-screen flex-col px-4 py-4 sm:px-8 sm:py-6 lg:px-12 lg:py-8">
+        <section className={cn("relative z-10 flex min-h-screen flex-col px-4 py-4 sm:px-8 sm:py-6 lg:px-12 lg:py-8", closing ? "menu-close" : "menu-open")}>
           <header className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border pb-4">
             <div className="flex min-w-0 items-center gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-md bg-primary font-display text-xl font-black text-primary-foreground">S</div>
@@ -258,7 +252,7 @@ function Index() {
               <Button variant="icon" aria-label="Menühang ki- vagy bekapcsolása" title="Menühang" onClick={() => { const next = !soundEnabled; setSoundEnabled(next); sendToFiveM("setMenuSound", { enabled: next }); playMenuSound(); }}>
                 {soundEnabled ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
               </Button>
-              <Button variant="icon" aria-label="Menü bezárása" title="Menü bezárása" onClick={() => { playMenuSound("close"); sendToFiveM("closePauseMenu"); setMenuOpen(false); }}>
+              <Button variant="icon" aria-label="Menü bezárása" title="Menü bezárása" onClick={closeMenu}>
                 <X aria-hidden="true" />
               </Button>
             </div>
@@ -275,19 +269,10 @@ function Index() {
                     onClick={() => chooseTile(tile)}
                     className={cn(
                       tile.area,
-                      "group tile-enter relative h-auto min-h-32 w-full justify-start overflow-hidden rounded-md border border-border bg-tile p-0 text-left text-foreground shadow-tile hover:border-primary hover:bg-tile-active focus-visible:border-primary sm:min-h-0",
+                      "group tile-enter relative h-auto min-h-32 w-full justify-start overflow-hidden rounded-md border border-border bg-tile p-0 text-left text-foreground shadow-tile backdrop-blur-md transition-colors hover:border-primary hover:bg-tile-active focus-visible:border-primary sm:min-h-0",
                     )}
-                    style={{ animationDelay: `${index * 55}ms` }}
+                    style={{ animationDelay: `${180 + index * 80}ms` }}
                   >
-                    <img
-                      src={tile.image}
-                      alt=""
-                      width={1024}
-                      height={768}
-                      loading="lazy"
-                      className={cn("absolute inset-0 h-full w-full object-cover opacity-45 transition duration-500 group-hover:scale-105 group-hover:opacity-65", tile.position)}
-                    />
-                    <div className="absolute inset-0 bg-tile-wash" aria-hidden="true" />
                     <div className="relative flex h-full w-full flex-col justify-between p-4 sm:p-5">
                       <div className="flex items-start justify-between gap-3">
                         <span className={cn("grid size-10 shrink-0 place-items-center rounded-md border border-border bg-icon text-muted-foreground transition group-hover:border-primary group-hover:text-primary", tile.accent && "border-primary text-primary")}>
