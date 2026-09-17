@@ -192,6 +192,13 @@ function Index() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [active]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    playMenuSound("select");
+    sendToFiveM("menuOpened", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
+
   const chooseTile = (tile: Tile) => {
     playMenuSound(tile.id === "return" ? "close" : "select");
     if (tile.id === "return") {
