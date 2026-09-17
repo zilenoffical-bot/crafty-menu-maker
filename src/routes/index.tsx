@@ -192,6 +192,13 @@ function Index() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [active]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    playMenuSound("select");
+    sendToFiveM("menuOpened", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
+
   const chooseTile = (tile: Tile) => {
     playMenuSound(tile.id === "return" ? "close" : "select");
     if (tile.id === "return") {
@@ -204,7 +211,12 @@ function Index() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <main
+      className={cn(
+        "relative min-h-screen overflow-hidden text-foreground",
+        isFiveM ? "bg-transparent" : "bg-background",
+      )}
+    >
       {!isFiveM && (
         <img
           src={cityImage}
@@ -214,7 +226,10 @@ function Index() {
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-scene-wash" aria-hidden="true" />
+      <div
+        className={cn("absolute inset-0", isFiveM ? "bg-black/45" : "bg-scene-wash")}
+        aria-hidden="true"
+      />
 
       {!menuOpen ? (
         <div className="relative z-10 grid min-h-screen place-items-center px-6">
