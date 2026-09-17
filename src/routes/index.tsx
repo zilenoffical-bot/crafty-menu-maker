@@ -49,6 +49,7 @@ type Tile = {
   description: string;
   icon: ElementType;
   area: string;
+  from: string;
   accent?: boolean;
 };
 
@@ -60,6 +61,7 @@ const tiles: Tile[] = [
     description: "128 játékos online",
     icon: UsersRound,
     area: "tile-players",
+    from: "tile-from-left",
   },
   {
     id: "settings",
@@ -68,6 +70,7 @@ const tiles: Tile[] = [
     description: "Grafika, hang és irányítás",
     icon: Settings,
     area: "tile-settings",
+    from: "tile-from-top",
   },
   {
     id: "news",
@@ -76,6 +79,7 @@ const tiles: Tile[] = [
     description: "Megérkezett a Night Shift frissítés",
     icon: Newspaper,
     area: "tile-news",
+    from: "tile-from-right",
   },
   {
     id: "rules",
@@ -84,6 +88,7 @@ const tiles: Tile[] = [
     description: "Játssz tisztán. Maradj karakterben.",
     icon: BookOpenText,
     area: "tile-rules",
+    from: "tile-from-left",
   },
   {
     id: "map",
@@ -92,6 +97,7 @@ const tiles: Tile[] = [
     description: "Helyszínek és útvonalak",
     icon: MapPinned,
     area: "tile-map",
+    from: "tile-from-center",
     accent: true,
   },
   {
@@ -101,6 +107,7 @@ const tiles: Tile[] = [
     description: "Parancsok és gyakori kérdések",
     icon: CircleHelp,
     area: "tile-help",
+    from: "tile-from-bottom",
   },
   {
     id: "return",
@@ -109,6 +116,7 @@ const tiles: Tile[] = [
     description: "ESC billentyűvel is bezárható",
     icon: Gamepad2,
     area: "tile-return",
+    from: "tile-from-bottom",
     accent: true,
   },
 ];
@@ -269,7 +277,8 @@ function Index() {
                     onClick={() => chooseTile(tile)}
                     className={cn(
                       tile.area,
-                      "group tile-enter relative h-auto min-h-32 w-full justify-start overflow-hidden rounded-md border border-border bg-tile p-0 text-left text-foreground shadow-tile backdrop-blur-md transition-colors hover:border-primary hover:bg-tile-active focus-visible:border-primary sm:min-h-0",
+                      tile.from,
+                      "group tile-enter relative h-full w-full min-w-0 justify-start overflow-hidden rounded-md border border-border bg-tile p-0 text-left text-foreground shadow-tile backdrop-blur-md transition-colors hover:border-primary hover:bg-tile-active focus-visible:border-primary",
                     )}
                     style={{ animationDelay: `${180 + index * 80}ms` }}
                   >
